@@ -2,9 +2,12 @@ import streamlit as st
 import requests
 import random
 
-# Your Grok API key (enter in sidebar)
-API_KEY = st.sidebar.text_input("Grok API Key", type="password")
+# Grok API configuration
 API_URL = "https://api.x.ai/v1/chat/completions"
+
+# API key input in main area (easier access on mobile)
+with st.expander("🔑 API Key Settings", expanded=False):
+    API_KEY = st.text_input("Grok API Key", type="password", help="Enter your Grok API key to generate entries")
 
 # Exact prompt template – locked to our finalized format
 PROMPT_TEMPLATE = """
