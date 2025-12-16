@@ -1,1 +1,3 @@
-streamlit>=1.52.1
+streamlit
+beautifulsoup4
+beautifulsoup4
