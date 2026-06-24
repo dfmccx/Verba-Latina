@@ -3,6 +3,11 @@ import requests
 import random
 import os
 
+st.markdown('<link rel="manifest" href="manifest.json">', unsafe_allow_html=True)
+
+# PWA Manifest
+st.markdown('<link rel="manifest" href="manifest.json">', unsafe_allow_html=True)
+
 # Load from secret if available, fallback to sidebar
 API_KEY = os.getenv("GROK_API_KEY")
 if not API_KEY:
@@ -14,13 +19,13 @@ if not API_KEY:
 
 API_URL = "https://api.x.ai/v1/chat/completions"
 
-# Updated prompt – Definition first after header, extra spacing
+# STRENGTHENED PROMPT - forces full verb tables
 PROMPT_TEMPLATE = """
 Generate a high-quality Latin dictionary entry for the query: "{query}"
 
 Determine if the query is Latin (any form) or English and set direction accordingly (Latin → English or English → Latin).
 
-Follow this EXACT structure and style. Do not deviate.
+Follow this EXACT structure and style. Do not deviate. **ALL TABLES MUST BE COMPLETE AND AT THE VERY END. NEVER OMIT TABLES.**
 
 Start directly with the main lemma or phrase as the top header (bold with macrons if applicable):
 
@@ -40,8 +45,6 @@ Then:
 
 **Frequency**: [brief note, e.g., Very high – common in poetry]
 
-[Conjugation or declension tables – always 3 columns: Person/Case (bold), Form, English Example. Use STRICTLY LITERAL English examples, e.g., 'peace (subject)' for nominative, 'of peace' for genitive, 'to/for peace' for dative – no contextual sentences. Split verb tenses into separate tables with **Tense Name** as bold heading, noun singular/plural into separate tables with **Singular Declension** and **Plural Declension** as bold headings – no side-scrolling. For nouns, ALWAYS order cases exactly: Nominative, Vocative, Accusative, Genitive, Dative, Ablative]
-
 **Infinitive**: [if verb]
 
 **Imperative**: [if verb]
@@ -58,7 +61,16 @@ Then:
   - [Author, Work reference]: "[Latin quote]" ("[English translation]").
   - Exactly 3 examples with accurate citations and literal translations.
 
-Add an extra newline after each bold section for clarity and spacing. Use macrons correctly. Be accurate, professional, and comprehensive. Include multiple senses/words if needed for English queries. For phrases, treat the phrase as the main lemma and provide explanation, origin, and examples.
+**TABLES (MANDATORY - MUST BE COMPLETE AND AT THE VERY END)**:
+After Classical Examples, always include FULL tables:
+- For nouns: **Singular Declension** and **Plural Declension** tables. 
+  - EXACT column order: Nominative, Vocative, Accusative, Genitive, Dative, Ablative.
+  - Exactly 3 columns: **Case** (bold), Form, English Example (literal).
+- For verbs: Separate tables for **ALL major tenses and moods** (Present Indicative, Imperfect Indicative, Future Indicative, Perfect Indicative, Pluperfect Indicative, Future Perfect Indicative, Present Subjunctive, Imperfect Subjunctive, etc.). Bold tense/mood name. 3 columns: **Person**, Form, English Example (literal). Include all persons (1st, 2nd, 3rd singular and plural).
+
+Use proper markdown tables. No side-scrolling. NEVER skip tables or tenses.
+
+Add an extra newline after each bold section for clarity and spacing. Use macrons correctly. Be accurate, professional, and comprehensive.
 """
 
 # Only Latin words and phrases for random entry
@@ -72,7 +84,7 @@ wotd_options = [
 
 st.set_page_config(page_title="Verba Latina", layout="centered")
 
-# Serif font CSS + aesthetic improvements
+# CSS - Stronger spinner + White sidebar menu text in BOTH modes
 st.markdown("""
 <style>
     html, body, [class*="css"] {
@@ -108,38 +120,35 @@ st.markdown("""
         color: #000 !important;
         font-weight: bold !important;
     }
+    /* Label and placeholder */
+    label {
+        color: #333333 !important;
+    }
+    .stTextInput > div > div > input::placeholder {
+        color: #555555 !important;
+        opacity: 1 !important;
+    }
+    .stTextInput > div > div > input {
+        color: #000000 !important;
+    }
+    /* STRONGER Spinner in Light Mode */
+    .stSpinner > div > div {
+        border-color: #555555 !important;
+        border-width: 8px !important;
+    }
+    .stSpinner > div > div > div {
+        border-top-color: #0D47A1 !important;
+        border-width: 8px !important;
+    }
+    /* White sidebar menu text in BOTH modes */
+    .stSidebar * {
+        color: #ffffff !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# Persistent theme using localStorage
-st.markdown("""
-<script>
-    const getTheme = () => localStorage.getItem("verba_latina_theme") || "Light";
-    const setTheme = (theme) => localStorage.setItem("verba_latina_theme", theme);
-
-    // Load saved theme on start
-    const savedTheme = getTheme();
-    if (savedTheme === "Dark") {
-        document.body.classList.add("dark-mode");
-    }
-
-    // Save theme on change (Streamlit will rerun on selectbox change)
-</script>
-""", unsafe_allow_html=True)
-
-# Theme selector – default to saved or Light
-default_mode = "Light"
-# To get the saved theme, we use a placeholder (Streamlit can't read JS directly, but we can default to Light and save on change)
-mode = st.sidebar.selectbox("Theme", ["Light", "Dark"], index=0 if default_mode == "Light" else 1)
-
-# Save theme on change
-st.markdown(f"""
-<script>
-    setTheme("{mode}");
-</script>
-""", unsafe_allow_html=True)
-
-# Apply theme styles
+# Light/Dark mode
+mode = st.sidebar.selectbox("Theme", ["Light", "Dark"], index=0)
 if mode == "Dark":
     st.markdown("""
     <style>
@@ -149,6 +158,8 @@ if mode == "Dark":
         .stButton > button {background-color: #444 !important; color: #fff !important;}
         th {background-color: #444 !important; color: #fff !important;}
         td {border-color: #555 !important;}
+        .stSpinner > div > div {border-color: #ffffff !important;}
+        .stSpinner > div > div > div {border-top-color: #90CAF9 !important;}
     </style>
     """, unsafe_allow_html=True)
 else:
@@ -159,6 +170,9 @@ else:
         .stTextInput > div > div > input {background-color: #fff !important; color: #000 !important;}
         .stButton > button {background-color: #f0f0f0 !important; color: #000 !important;}
         th {background-color: #e0e0e0 !important; color: #000 !important;}
+        /* Very dark spinner in light mode */
+        .stSpinner > div > div {border-color: #555555 !important;}
+        .stSpinner > div > div > div {border-top-color: #0D47A1 !important;}
     </style>
     """, unsafe_allow_html=True)
 
@@ -168,7 +182,7 @@ st.markdown("<p class='subtitle'>The Ultimate English-Latin Dictionary</p>", uns
 st.markdown("A comprehensive bidirectional resource for Latin and English. Entries are generated dynamically with precise morphological, etymological, and classical detail.")
 
 # Pages list
-pages = ["Home", "About Latin", "History of Latin", "Pronunciation Guide", "Declensions Overview", "Conjugations Overview", "Common Phrases"]
+pages = ["Home", "About", "About Latin", "History of Latin", "Pronunciation Guide", "Declensions Overview", "Conjugations Overview", "Common Phrases", "Privacy Policy"]
 
 # Initialize session state for page
 if 'page' not in st.session_state:
@@ -186,14 +200,26 @@ if page != st.session_state.page:
 
 current_page = st.session_state.page
 
-# Cache generation for performance
-@st.cache_data(ttl=3600)
-def generate_entry_cached(user_query):
+def is_entry_complete(entry_text):
+    text = entry_text.lower()
+    if "#### **" not in entry_text or "**Definition**:" not in entry_text:
+        return False
+    if "singular declension" in text and "plural declension" in text:
+        return True
+    # Require more verb tenses to force completeness
+    tense_count = sum(1 for t in ["present indicative", "imperfect indicative", "future indicative", 
+                                  "perfect indicative", "pluperfect", "present subjunctive", 
+                                  "imperfect subjunctive", "future perfect"] if t in text)
+    if tense_count >= 6:
+        return True
+    return False
+
+def generate_entry_with_retry(user_query, max_attempts=4):
     prompt = PROMPT_TEMPLATE.format(query=user_query)
 
     payload = {
         "messages": [
-            {"role": "system", "content": "You are an expert Latin scholar generating precise, structured dictionary entries. Prioritize factual accuracy from classical sources (Lewis & Short, Allen & Greenough). Follow the format exactly."},
+            {"role": "system", "content": "You are an expert Latin scholar. For verbs you MUST generate FULL tables for ALL major tenses and moods. Never skip any. Exact case order for nouns. Always include English Example column. Tables at the very end."},
             {"role": "user", "content": prompt}
         ],
         "model": "grok-4-1-fast-reasoning",
@@ -206,16 +232,24 @@ def generate_entry_cached(user_query):
         "Content-Type": "application/json"
     }
 
-    try:
-        response = requests.post(API_URL, headers=headers, json=payload, timeout=120)
-        response.raise_for_status()
-        result = response.json()
-        return result["choices"][0]["message"]["content"], None
-    except Exception as e:
-        return None, f"Error: {str(e)} – Check key or internet connection."
+    for attempt in range(max_attempts):
+        try:
+            response = requests.post(API_URL, headers=headers, json=payload, timeout=120)
+            response.raise_for_status()
+            result = response.json()
+            entry = result["choices"][0]["message"]["content"]
+
+            if is_entry_complete(entry):
+                return entry, None
+        except Exception as e:
+            if attempt == max_attempts - 1:
+                return None, f"Error: {str(e)}"
+
+    return None, "Failed to generate a complete entry after multiple attempts."
 
 def display_entry(user_query):
-    entry, error = generate_entry_cached(user_query)
+    with st.spinner("⏳ *Patientia virtus est...*"):
+        entry, error = generate_entry_with_retry(user_query)
 
     if error:
         st.error(error)
@@ -229,16 +263,60 @@ if current_page == "Home":
     query = st.text_input("Enter Latin (any form) or English word/phrase:", placeholder="e.g., amavi, gladium, love, justice")
 
     if query:
-        with st.spinner("⏳ *Patientia virtus est...*"):
-            display_entry(query)
+        display_entry(query)
     else:
         wotd = random.choice(wotd_options)
         st.markdown("<h3><em>Entrata Aleatoria</em></h3>", unsafe_allow_html=True)
-        with st.spinner("⏳ *Patientia virtus est...*"):
-            display_entry(wotd)
+        display_entry(wotd)
+
+elif current_page == "About":
+    if st.button("Back to Home", key="back_top_about"):
+        st.session_state.page = "Home"
+        st.rerun()
+    st.title("About")
+    st.markdown("""
+"Verba Latina" is the elite Latin-to-English and English-to-Latin digital dictionary. Explore the richness of the entire Latin language right from your computer or smartphone. 
+
+This app was designed with Latin learners in mind. Other online translators provide short or single-word translations of Latin terms. But, as all Latin learners know, the forms and meanings of Latin terms change based on context. "Verba Latina" offers users a complete breakdown of any Latin term or phrase, including convenient tables listing cases and tenses, comprehensive definitions, etymologies, related words, and more. "Verba Latina" is your ultimate reference tool for all Latin vocabulary.
+
+**Powered by Grok. Built by history.**
+""")
+    if st.button("Back to Home", key="back_bottom_about"):
+        st.session_state.page = "Home"
+        st.rerun()
+
+elif current_page == "Privacy Policy":
+    if st.button("Back to Home", key="back_top_privacy"):
+        st.session_state.page = "Home"
+        st.rerun()
+    st.title("Privacy Policy")
+    st.markdown("""
+**Privacy Policy**
+
+Last updated: June 23, 2026
+
+**Verba Latina** ("we", "our", or "the app") is a Latin dictionary tool powered by the Grok API from xAI.
+
+**What data we collect:**
+- We do not collect any personal information from users.
+- Your searches (Latin/English queries) are sent to the Grok API to generate dictionary entries. These queries are not stored by this app.
+- No accounts, no tracking, no analytics.
+
+**Third-party services:**
+- This app uses the Grok API provided by xAI. Your queries are processed by xAI according to their [Privacy Policy](https://x.ai/legal/privacy-policy).
+
+**Changes to this policy:**
+We may update this Privacy Policy occasionally. Continued use of the app after changes constitutes acceptance of the new policy.
+
+If you have any questions, feel free to reach out via the app's feedback or on X (@VerbaLatinaApp).
+
+Built with respect for user privacy.
+""")
+    if st.button("Back to Home", key="back_bottom_privacy"):
+        st.session_state.page = "Home"
+        st.rerun()
 
 else:
-    # Back to Home at top
     if st.button("Back to Home", key="back_top"):
         st.session_state.page = "Home"
         st.rerun()
@@ -304,52 +382,32 @@ Latin nouns are grouped into five declensions based on stem endings. Gender is f
 **4th Declension** (masculine/neuter, -u stem): manus, manūs ("hand", feminine); cornu, cornūs ("horn", neuter).  
 **5th Declension** (mostly feminine, -e stem): rēs, reī ("thing"); diēs, diēī ("day", masculine in some uses).
 
-Gender is learned with the noun—it's fixed. Some nouns are irregular (e.g., domus mixes 4th and 2nd).
-
 **The Six Cases and Their Functions**  
-Latin uses cases to show a noun's role in the sentence (replacing word order/prepositions in English). Here are the main uses, with examples from **puella** ("girl"):
+Latin uses cases to show a noun's role in the sentence. Here are the main uses, with examples from **puella** ("girl"):
 
-- **Nominative**: Subject of the verb ("who/what does the action").  
-  Puella currit. ("The girl runs.")
+- **Nominative**: Subject. Puella currit. ("The girl runs.")
+- **Vocative**: Direct address. Puella, venī! ("Girl, come!")
+- **Accusative**: Direct object. Puellam videō. ("I see the girl.")
+- **Genitive**: Possession. Liber puellae. ("The girl's book.")
+- **Dative**: Indirect object. Puellae librum dō. ("I give the book to the girl.")
+- **Ablative**: Means, separation, etc. Cum puellā ambulō. ("I walk with the girl.")
 
-- **Vocative**: Direct address ("O [noun]!").  
-  Puella, venī! ("Girl, come!")
-
-- **Accusative**: Direct object ("what receives the action") or motion toward (with some prepositions).  
-  Puellam videō. ("I see the girl.")
-
-- **Genitive**: Possession ("of [noun]") or partitive ("some of").  
-  Liber puellae. ("The book of the girl" / "The girl's book.")
-
-- **Dative**: Indirect object ("to/for [noun]") or benefit/possession.  
-  Puellae librum dō. ("I give the book to the girl.")
-
-- **Ablative**: Means/instrument ("by/with/from [noun]"), separation, or accompaniment (often with prepositions).  
-  Cum puellā ambulō. ("I walk with the girl.")
-
-Cases allow flexible word order—meaning comes from endings, not position. Mastering them unlocks Latin's precision and beauty.
+Mastering cases unlocks Latin's precision and beauty.
 """)
 
     elif current_page == "Conjugations Overview":
         st.title("Conjugations Overview")
         st.markdown("""
-Verbs change form (conjugate) for person, number, tense, mood, and voice. There are four regular conjugations, identified by infinitive ending.
+Verbs change form for person, number, tense, mood, and voice. There are four regular conjugations.
 
-**1st Conjugation** (-āre): amāre ("to love") – long ā throughout.
+**1st Conjugation** (-āre): amāre ("to love").  
+**2nd Conjugation** (-ēre): vidēre ("to see").  
+**3rd Conjugation** (-ere): legere ("to read").  
+**4th Conjugation** (-īre): audīre ("to hear").
 
-**2nd Conjugation** (-ēre, stress on stem): vidēre ("to see") – long ē in stem.
+Irregular verbs include sum, ferō, eō, volō.
 
-**3rd Conjugation** (-ere, short e): legere ("to read") – variable stem vowels.
-
-**4th Conjugation** (-īre): audīre ("to hear") – long ī before -re.
-
-Irregular verbs include sum (to be), ferō (to carry), eō (to go), volō (to want).
-
-Principal parts (four forms) provide stems for all tenses: e.g., amō, amāre, amāvī, amātum.
-
-Tenses express time (present, past, future) and aspect (completed vs. ongoing). Moods include indicative (statements), subjunctive (possibility, wish), imperative (commands).
-
-Mastering conjugations unlocks Latin's precision and elegance in expression.
+Principal parts provide stems for all tenses. Mastering conjugations unlocks Latin's precision and elegance in expression.
 """)
 
     elif current_page == "Common Phrases":
@@ -376,7 +434,6 @@ Latin phrases endure in English and modern culture. Here are some classics with 
 These expressions capture Roman wit, philosophy, and drama.
 """)
 
-    # Back to Home at bottom
     if st.button("Back to Home", key="back_bottom"):
         st.session_state.page = "Home"
         st.rerun()
