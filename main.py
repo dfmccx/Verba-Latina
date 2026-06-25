@@ -102,30 +102,17 @@ wotd_options = [
 
 st.set_page_config(page_title="Verba Latina", layout="centered")
 
-# ================== PERSISTENT THEME (Improved) ==================
+# Persistent Theme
 if 'theme' not in st.session_state:
     st.session_state.theme = "Light"
 
-# JavaScript to handle localStorage
-st.markdown("""
-<script>
-    // Load saved theme on startup
-    const savedTheme = localStorage.getItem('verba-theme');
-    if (savedTheme) {
-        document.documentElement.setAttribute('data-theme', savedTheme);
-    }
-</script>
-""", unsafe_allow_html=True)
-
-# Theme selector in sidebar
-mode = st.sidebar.selectbox("Theme", ["Light", "Dark"], 
-                           index=0 if st.session_state.theme == "Light" else 1)
+mode = st.sidebar.selectbox("Theme", ["Light", "Dark"], index=0 if st.session_state.theme == "Light" else 1)
 
 if mode != st.session_state.theme:
     st.session_state.theme = mode
     st.rerun()
 
-# Apply the CSS
+# Apply theme
 if st.session_state.theme == "Dark":
     st.markdown("""
     <style>
@@ -144,7 +131,7 @@ else:
         th {background-color: #e0e0e0 !important; color: #000 !important;}
     </style>
     """, unsafe_allow_html=True)
-
+    
 # CSS - Stronger spinner + White sidebar menu text in BOTH modes
 st.markdown("""
 <style>
