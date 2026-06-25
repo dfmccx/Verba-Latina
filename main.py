@@ -3,9 +3,7 @@ import requests
 import random
 import os
 
-st.markdown('<link rel="manifest" href="manifest.json">', unsafe_allow_html=True)
-
-# PWA Manifest
+# PWA Manifest + Apple Support
 st.markdown('<link rel="manifest" href="manifest.json">', unsafe_allow_html=True)
 
 # Load from secret if available, fallback to sidebar
