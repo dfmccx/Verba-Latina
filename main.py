@@ -88,16 +88,52 @@ wotd_options = [
 
 st.set_page_config(page_title="Verba Latina", layout="centered")
 
-# ================== PERSISTENT THEME ==================
+# ================== PERSISTENT LIGHT/DARK MODE ==================
 if 'theme' not in st.session_state:
-    st.session_state.theme = "Light"  # Default
+    st.session_state.theme = "Light"
 
+# Load from browser localStorage via JavaScript
+st.markdown("""
+<script>
+    function setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+    }
+    // Load saved theme on page load
+    const saved = localStorage.getItem('theme');
+    if (saved) {
+        setTheme(saved);
+    }
+</script>
+""", unsafe_allow_html=True)
+
+# Sidebar selector
 mode = st.sidebar.selectbox("Theme", ["Light", "Dark"], 
                            index=0 if st.session_state.theme == "Light" else 1)
 
 if mode != st.session_state.theme:
     st.session_state.theme = mode
     st.rerun()
+
+# Apply the correct CSS
+if st.session_state.theme == "Dark":
+    st.markdown("""
+    <style>
+        .stApp {background-color: #0e1117 !important; color: #fafafa !important;}
+        .stTextInput > div > div > input {background-color: #333 !important; color: #fff !important;}
+        .stButton > button {background-color: #444 !important; color: #fff !important;}
+        th {background-color: #444 !important; color: #fff !important;}
+    </style>
+    """, unsafe_allow_html=True)
+else:
+    st.markdown("""
+    <style>
+        .stApp {background-color: #ffffff !important; color: #000000 !important;}
+        .stTextInput > div > div > input {background-color: #fff !important; color: #000 !important;}
+        .stButton > button {background-color: #f0f0f0 !important; color: #000 !important;}
+        th {background-color: #e0e0e0 !important; color: #000 !important;}
+    </style>
+    """, unsafe_allow_html=True)
 
 # CSS - Stronger spinner + White sidebar menu text in BOTH modes
 st.markdown("""
