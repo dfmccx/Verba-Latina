@@ -88,6 +88,17 @@ wotd_options = [
 
 st.set_page_config(page_title="Verba Latina", layout="centered")
 
+# ================== PERSISTENT THEME ==================
+if 'theme' not in st.session_state:
+    st.session_state.theme = "Light"  # Default
+
+mode = st.sidebar.selectbox("Theme", ["Light", "Dark"], 
+                           index=0 if st.session_state.theme == "Light" else 1)
+
+if mode != st.session_state.theme:
+    st.session_state.theme = mode
+    st.rerun()
+
 # CSS - Stronger spinner + White sidebar menu text in BOTH modes
 st.markdown("""
 <style>
@@ -151,32 +162,24 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Light/Dark mode
-mode = st.sidebar.selectbox("Theme", ["Light", "Dark"], index=0)
-if mode == "Dark":
+# Theme CSS based on saved choice
+if st.session_state.theme == "Dark":
     st.markdown("""
     <style>
         .stApp {background-color: #0e1117 !important; color: #fafafa !important;}
-        .css-1v0mbdj {background-color: #262730 !important;}
         .stTextInput > div > div > input {background-color: #333 !important; color: #fff !important;}
         .stButton > button {background-color: #444 !important; color: #fff !important;}
         th {background-color: #444 !important; color: #fff !important;}
         td {border-color: #555 !important;}
-        .stSpinner > div > div {border-color: #ffffff !important;}
-        .stSpinner > div > div > div {border-top-color: #90CAF9 !important;}
     </style>
     """, unsafe_allow_html=True)
 else:
     st.markdown("""
     <style>
         .stApp {background-color: #ffffff !important; color: #000000 !important;}
-        .css-1v0mbdj {background-color: #f0f2f6 !important;}
         .stTextInput > div > div > input {background-color: #fff !important; color: #000 !important;}
         .stButton > button {background-color: #f0f0f0 !important; color: #000 !important;}
         th {background-color: #e0e0e0 !important; color: #000 !important;}
-        /* Very dark spinner in light mode */
-        .stSpinner > div > div {border-color: #555555 !important;}
-        .stSpinner > div > div > div {border-top-color: #0D47A1 !important;}
     </style>
     """, unsafe_allow_html=True)
 
