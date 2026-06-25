@@ -88,15 +88,21 @@ wotd_options = [
 
 st.set_page_config(page_title="Verba Latina", layout="centered")
 
-# ================== PERSISTENT THEME (Reliable Version) ==================
+# ================== PERSISTENT THEME ==================
 if 'theme' not in st.session_state:
     st.session_state.theme = "Light"
 
-# JavaScript to save and load from browser storage
-st.markdown(f"""
+# JavaScript for saving theme to browser storage
+st.markdown("""
 <script>
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
+    function saveTheme(theme) {
+        localStorage.setItem('theme', theme);
+    }
+    // Load saved theme
+    const saved = localStorage.getItem('theme');
+    if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+    }
 </script>
 """, unsafe_allow_html=True)
 
@@ -106,7 +112,6 @@ mode = st.sidebar.selectbox("Theme", ["Light", "Dark"],
 
 if mode != st.session_state.theme:
     st.session_state.theme = mode
-    localStorage.setItem('theme', mode.lower());  // Save immediately
     st.rerun()
 
 # Apply CSS
