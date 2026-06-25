@@ -3,7 +3,7 @@ import requests
 import random
 import os
 
-# ================== CONFIG FIRST ==================
+# ================== PAGE CONFIG FIRST ==================
 st.set_page_config(page_title="Verba Latina", layout="centered")
 
 # PWA Manifest + Apple Support
