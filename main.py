@@ -5,15 +5,10 @@ import os
 
 st.markdown("""
 <script>
-    // Save theme when changed
-    window.addEventListener('load', function() {
-        const themeSelect = document.querySelector('select');
-        if (themeSelect) {
-            themeSelect.addEventListener('change', function() {
-                localStorage.setItem('verba-theme', this.value.toLowerCase());
-            });
-        }
-    });
+    const saved = localStorage.getItem('verba-theme');
+    if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+    }
 </script>
 """, unsafe_allow_html=True)
 
@@ -102,17 +97,28 @@ wotd_options = [
 
 st.set_page_config(page_title="Verba Latina", layout="centered")
 
-# Persistent Theme
+# ================== PERSISTENT THEME (Final Attempt) ==================
 if 'theme' not in st.session_state:
     st.session_state.theme = "Light"
 
-mode = st.sidebar.selectbox("Theme", ["Light", "Dark"], index=0 if st.session_state.theme == "Light" else 1)
+# Early JavaScript for persistence
+st.markdown("""
+<script>
+    // Load theme immediately
+    const savedTheme = localStorage.getItem('verba-theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+</script>
+""", unsafe_allow_html=True)
+
+# Sidebar selector
+mode = st.sidebar.selectbox("Theme", ["Light", "Dark"], 
+                           index=0 if st.session_state.theme == "Light" else 1)
 
 if mode != st.session_state.theme:
     st.session_state.theme = mode
     st.rerun()
 
-# Apply theme
+# Apply CSS
 if st.session_state.theme == "Dark":
     st.markdown("""
     <style>
