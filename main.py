@@ -2,15 +2,7 @@ import streamlit as st
 import requests
 import random
 import os
-
-st.markdown("""
-<script>
-    const saved = localStorage.getItem('verba-theme');
-    if (saved) {
-        document.documentElement.setAttribute('data-theme', saved);
-    }
-</script>
-""", unsafe_allow_html=True)
+from streamlit_local_storage import LocalStorage
 
 # PWA Manifest + Apple Support
 st.markdown("""
@@ -97,18 +89,14 @@ wotd_options = [
 
 st.set_page_config(page_title="Verba Latina", layout="centered")
 
-# ================== PERSISTENT THEME (Final Attempt) ==================
-if 'theme' not in st.session_state:
-    st.session_state.theme = "Light"
+# ================== PERSISTENT THEME (via browser localStorage) ==================
+# This bridges Python <-> the browser's localStorage so the choice survives
+# closing and reopening the app, not just page reruns within one session.
+localS = LocalStorage()
 
-# Early JavaScript for persistence
-st.markdown("""
-<script>
-    // Load theme immediately
-    const savedTheme = localStorage.getItem('verba-theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-</script>
-""", unsafe_allow_html=True)
+if 'theme' not in st.session_state:
+    saved_theme = localS.getItem("verba-theme")
+    st.session_state.theme = saved_theme if saved_theme in ("Light", "Dark") else "Light"
 
 # Sidebar selector
 mode = st.sidebar.selectbox("Theme", ["Light", "Dark"], 
@@ -116,6 +104,7 @@ mode = st.sidebar.selectbox("Theme", ["Light", "Dark"],
 
 if mode != st.session_state.theme:
     st.session_state.theme = mode
+    localS.setItem("verba-theme", mode)
     st.rerun()
 
 # Apply CSS
