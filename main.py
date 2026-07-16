@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import random
 import os
+import time
 from streamlit_local_storage import LocalStorage
 
 # PWA Manifest + Apple Support
@@ -105,6 +106,7 @@ mode = st.sidebar.selectbox("Theme", ["Light", "Dark"],
 if mode != st.session_state.theme:
     st.session_state.theme = mode
     localS.setItem("verba-theme", mode)
+    time.sleep(1.5)  # give the browser time to finish the localStorage write before we rerun
     st.rerun()
 
 # Apply CSS
