@@ -137,7 +137,7 @@ st.markdown("""
     [data-testid="stIconMaterial"],
     .material-symbols-outlined,
     .material-icons {
-        font-family: 'Material Symbols Outlined' !important;
+        font-family: 'Material Symbols Rounded' !important;
     }
     html, body, [class*="css"] {
         font-family: 'Times New Roman', Times, serif !important;
