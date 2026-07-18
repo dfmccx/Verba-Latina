@@ -67,8 +67,7 @@ Then:
   - [Author, Work reference]: "[Latin quote]" ("[English translation]").
   - Exactly 3 examples with accurate citations and literal translations.
 
-**TABLES (MANDATORY - MUST BE COMPLETE AND AT THE VERY END)**:
-After Classical Examples, always include FULL tables:
+After Classical Examples, always include FULL tables at the very end. This is mandatory — never omit them. Do not print any instruction text, section label, or heading that describes this requirement; output only the actual table titles and data below.
 - For nouns: **Singular Declension** and **Plural Declension** tables. 
   - EXACT column order: Nominative, Vocative, Accusative, Genitive, Dative, Ablative.
   - Exactly 3 columns: **Case** (bold), Form, English Example (literal).
@@ -88,7 +87,7 @@ wotd_options = [
     "pax", "libertas"
 ]
 
-st.set_page_config(page_title="Verba Latina", layout="centered")
+st.set_page_config(page_title="Verba Latina", page_icon="icon.png", layout="centered")
 
 # ================== PERSISTENT THEME (via browser localStorage) ==================
 # This bridges Python <-> the browser's localStorage so the choice survives
@@ -132,8 +131,11 @@ else:
 # CSS - Stronger spinner + White sidebar menu text in BOTH modes
 st.markdown("""
 <style>
+    * {
+        font-family: 'Times New Roman', Times, serif !important;
+    }
     html, body, [class*="css"] {
-        font-family: 'Georgia', 'Times New Roman', Times, serif !important;
+        font-family: 'Times New Roman', Times, serif !important;
         line-height: 1.8 !important;
     }
     h1 {
@@ -251,7 +253,8 @@ def is_entry_complete(entry_text):
         return True
     return False
 
-def generate_entry_with_retry(user_query, max_attempts=4):
+@st.cache_data(show_spinner=False)
+def generate_entry_with_retry(user_query, _api_key, max_attempts=4):
     prompt = PROMPT_TEMPLATE.format(query=user_query)
 
     payload = {
@@ -265,7 +268,7 @@ def generate_entry_with_retry(user_query, max_attempts=4):
     }
 
     headers = {
-        "Authorization": f"Bearer {API_KEY}",
+        "Authorization": f"Bearer {_api_key}",
         "Content-Type": "application/json"
     }
 
@@ -286,7 +289,7 @@ def generate_entry_with_retry(user_query, max_attempts=4):
 
 def display_entry(user_query):
     with st.spinner("⏳ *Patientia virtus est...*"):
-        entry, error = generate_entry_with_retry(user_query)
+        entry, error = generate_entry_with_retry(user_query, API_KEY)
 
     if error:
         st.error(error)
