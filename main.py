@@ -134,6 +134,11 @@ st.markdown("""
     * {
         font-family: 'Times New Roman', Times, serif !important;
     }
+    [data-testid="stIconMaterial"],
+    .material-symbols-outlined,
+    .material-icons {
+        font-family: 'Material Symbols Outlined' !important;
+    }
     html, body, [class*="css"] {
         font-family: 'Times New Roman', Times, serif !important;
         line-height: 1.8 !important;
