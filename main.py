@@ -7,7 +7,7 @@ from streamlit_local_storage import LocalStorage
 
 # PWA Manifest + Apple Support
 st.markdown("""
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="https://raw.githubusercontent.com/dfmccx/Verba-Latina/main/manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Verba Latina">
