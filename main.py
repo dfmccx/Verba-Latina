@@ -11,7 +11,7 @@ st.markdown("""
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Verba Latina">
-<link rel="apple-touch-icon" href="https://i.imgur.com/mGURJtO.png">
+<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/dfmccx/Verba-Latina/main/icon.png">
 """, unsafe_allow_html=True)
 
 # Load from secret if available, fallback to sidebar
