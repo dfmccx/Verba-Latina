@@ -5,7 +5,36 @@ import os
 import time
 from streamlit_local_storage import LocalStorage
 
-# PWA Manifest + Apple Support
+# ================== PATCH STREAMLIT'S REAL index.html ==================
+# Anything added via st.markdown(unsafe_allow_html=True) only shows up
+# after the browser runs Streamlit's JavaScript - crawlers (like
+# PWABuilder's) that just fetch the raw page never see it. This patches
+# the actual static HTML file Streamlit serves, so the manifest link and
+# related tags are present from the very first response.
+def _patch_index_html():
+    try:
+        st_static_dir = os.path.dirname(st.__file__)
+        index_path = os.path.join(st_static_dir, "static", "index.html")
+        with open(index_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        if 'rel="manifest"' not in content:
+            injection = (
+                '<link rel="manifest" href="https://raw.githubusercontent.com/dfmccx/Verba-Latina/main/manifest.json">\n'
+                '<meta name="apple-mobile-web-app-capable" content="yes">\n'
+                '<meta name="apple-mobile-web-app-status-bar-style" content="black">\n'
+                '<meta name="apple-mobile-web-app-title" content="Verba Latina">\n'
+                '<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/dfmccx/Verba-Latina/main/icon.png">\n'
+                '</head>'
+            )
+            content = content.replace('</head>', injection, 1)
+            with open(index_path, "w", encoding="utf-8") as f:
+                f.write(content)
+    except Exception:
+        pass  # don't crash the app if the file can't be patched for any reason
+
+_patch_index_html()
+
+# PWA Manifest + Apple Support (kept as a fallback for real browsers)
 st.markdown("""
 <link rel="manifest" href="https://raw.githubusercontent.com/dfmccx/Verba-Latina/main/manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
